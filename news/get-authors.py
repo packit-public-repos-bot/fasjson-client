@@ -22,16 +22,13 @@ from argparse import ArgumentParser
 from subprocess import check_output
 
 
-EXCLUDE = [
-    "dependabot[bot]",
-    "dependabot-preview[bot]",
-    "Weblate (bot)",
-    "renovate[bot]",
-]
+EXCLUDE = ["Weblate (bot)"]
 
-last_tag = check_output(
-    "git tag | sort -n | tail -n 1", shell=True, universal_newlines=True
-).strip()
+last_tag = (
+    check_output(["git", "tag", "--sort=creatordate"], text=True)
+    .strip()
+    .split("\n")[-1]
+)
 
 args_parser = ArgumentParser()
 args_parser.add_argument(
@@ -53,7 +50,6 @@ log_range = args.since + ".." + args.until
 output = check_output(
     ["git", "log", log_range, "--format=%ae\t%an"], universal_newlines=True
 )
-print(last_tag)
 for line in output.splitlines():
     email, fullname = line.split("\t")
     email = email.split("@")[0].replace(".", "")
